@@ -1,0 +1,10 @@
+name: freecam
+version: '${project.version}'
+main: com.parknich.freecam.Freecam
+commands:
+  c:
+    description: Enter freecam
+    usage: /c
+  s:
+    description: Exit freecam
+    usage: /s
