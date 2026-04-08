@@ -10,13 +10,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public final class ServerCam extends JavaPlugin implements Listener {
 
-    private Map<UUID, Location> savedLocations = new HashMap<>();
+    private Persistence persistence;
 
     @Override
     public void onEnable() {
@@ -24,19 +22,23 @@ public final class ServerCam extends JavaPlugin implements Listener {
         getServer().getPluginManager().registerEvents(this, this);
         getCommand("c").setExecutor(this);
         getCommand("s").setExecutor(this);
+
+        persistence = new Persistence(this);
+        persistence.onEnable();
     }
 
     @Override
     public void onDisable() {
         for (Player player : getServer().getOnlinePlayers()) {
             if (player.getGameMode() == GameMode.SPECTATOR) {
-                Location saved = savedLocations.remove(player.getUniqueId());
+                Location saved = persistence.get(player.getUniqueId());
                 if (saved != null) {
                     player.teleport(saved);
                 }
                 player.setGameMode(GameMode.SURVIVAL);
             }
         }
+        persistence.onDisable();
     }
 
     @EventHandler
@@ -46,7 +48,7 @@ public final class ServerCam extends JavaPlugin implements Listener {
             return;
         }
 
-        Location saved = savedLocations.get(player.getUniqueId());
+        Location saved = persistence.get(player.getUniqueId());
         if (saved == null) {
             return;
         }
@@ -70,7 +72,7 @@ public final class ServerCam extends JavaPlugin implements Listener {
             if (player.getGameMode() == GameMode.SPECTATOR) {
                 return true;
             }
-            savedLocations.put(player.getUniqueId(), player.getLocation());
+            persistence.put(player.getUniqueId(), player.getLocation());
             player.setGameMode(GameMode.SPECTATOR);
         } else if (label.equalsIgnoreCase("s")) {
             exitFreecam(player);
@@ -80,7 +82,7 @@ public final class ServerCam extends JavaPlugin implements Listener {
     }
 
     private void exitFreecam(Player player) {
-        Location saved = savedLocations.remove(player.getUniqueId());
+        Location saved = persistence.remove(player.getUniqueId());
         if (saved != null) {
             player.teleport(saved);
         }
