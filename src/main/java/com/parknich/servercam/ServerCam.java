@@ -1,22 +1,27 @@
-package com.parknich.freecam;
+package com.parknich.servercam;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public final class Freecam extends JavaPlugin {
+public final class ServerCam extends JavaPlugin implements Listener {
 
     private Map<UUID, Location> savedLocations = new HashMap<>();
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
+        getServer().getPluginManager().registerEvents(this, this);
         getCommand("c").setExecutor(this);
         getCommand("s").setExecutor(this);
     }
@@ -31,6 +36,24 @@ public final class Freecam extends JavaPlugin {
                 }
                 player.setGameMode(GameMode.SURVIVAL);
             }
+        }
+    }
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        if (player.getGameMode() != GameMode.SPECTATOR) {
+            return;
+        }
+
+        Location saved = savedLocations.get(player.getUniqueId());
+        if (saved == null) {
+            return;
+        }
+
+        double radius = getConfig().getDouble("radius", 150);
+        if (player.getLocation().distance(saved) > radius) {
+            exitFreecam(player);
         }
     }
 
@@ -50,14 +73,17 @@ public final class Freecam extends JavaPlugin {
             savedLocations.put(player.getUniqueId(), player.getLocation());
             player.setGameMode(GameMode.SPECTATOR);
         } else if (label.equalsIgnoreCase("s")) {
-            Location saved = savedLocations.remove(player.getUniqueId());
-            if (saved == null) {
-                return true;
-            }
-            player.teleport(saved);
-            player.setGameMode(GameMode.SURVIVAL);
+            exitFreecam(player);
         }
 
         return true;
+    }
+
+    private void exitFreecam(Player player) {
+        Location saved = savedLocations.remove(player.getUniqueId());
+        if (saved != null) {
+            player.teleport(saved);
+        }
+        player.setGameMode(GameMode.SURVIVAL);
     }
 }

@@ -1,6 +1,6 @@
-name: freecam
+name: servercam
 version: '${project.version}'
-main: com.parknich.freecam.Freecam
+main: com.parknich.servercam.ServerCam
 commands:
   c:
     description: Enter freecam
