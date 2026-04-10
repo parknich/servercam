@@ -1,2 +1,16 @@
 radius: 150
-persistence: false
+# "yml" and "mariadb" supported
+persistence-type: yml
+persistence:
+  # Enables saving freecam data in a yml file/mariadb (e.g., if the server gets killed)
+  enabled: true
+  #Mariadb database config, if using yml or unsure, leave as is
+  host: localhost
+  port: 3306
+  database: servercam
+  username: root
+  password: ""
+  table: servercam
+npc:
+  #Spawns a guardian npc that kills the player if it dies
+  enabled: true

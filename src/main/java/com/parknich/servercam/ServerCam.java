@@ -1,91 +1,58 @@
 package com.parknich.servercam;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
+import com.parknich.servercam.command.CommandManager;
+import com.parknich.servercam.listener.RadiusListener;
+import com.parknich.servercam.listener.SpectatorListener;
+import com.parknich.servercam.npc.NpcManager;
+import com.parknich.servercam.persistence.Persistence;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.UUID;
-
-public final class ServerCam extends JavaPlugin implements Listener {
+public final class ServerCam extends JavaPlugin {
 
     private Persistence persistence;
+    private CommandManager commandManager;
+    private NpcManager npcManager;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        getServer().getPluginManager().registerEvents(this, this);
-        getCommand("c").setExecutor(this);
-        getCommand("s").setExecutor(this);
 
         persistence = new Persistence(this);
         persistence.onEnable();
+
+        npcManager = new NpcManager(this, persistence);
+        npcManager.onEnable(this);
+
+        commandManager = new CommandManager(this, npcManager);
+        commandManager.registerAll(persistence, npcManager);
+
+        double radius = getConfig().getDouble("radius", 150);
+        getServer().getPluginManager().registerEvents(new RadiusListener(persistence, npcManager, radius), this);
+        getServer().getPluginManager().registerEvents(new SpectatorListener(), this);
+        getServer().getPluginManager().registerEvents(new Listener() {
+            @EventHandler
+            public void onPlayerQuit(PlayerQuitEvent event) {
+                npcManager.removeGuardian(event.getPlayer());
+            }
+        }, this);
     }
 
     @Override
     public void onDisable() {
-        for (Player player : getServer().getOnlinePlayers()) {
-            if (player.getGameMode() == GameMode.SPECTATOR) {
-                Location saved = persistence.get(player.getUniqueId());
+        for (org.bukkit.entity.Player player : getServer().getOnlinePlayers()) {
+            if (player.getGameMode() == org.bukkit.GameMode.SPECTATOR) {
+                npcManager.removeGuardian(player);
+                org.bukkit.Location saved = persistence.get(player.getUniqueId());
                 if (saved != null) {
                     player.teleport(saved);
                 }
-                player.setGameMode(GameMode.SURVIVAL);
+                player.setGameMode(org.bukkit.GameMode.SURVIVAL);
+                persistence.remove(player.getUniqueId());
             }
         }
         persistence.onDisable();
-    }
-
-    @EventHandler
-    public void onPlayerMove(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
-        if (player.getGameMode() != GameMode.SPECTATOR) {
-            return;
-        }
-
-        Location saved = persistence.get(player.getUniqueId());
-        if (saved == null) {
-            return;
-        }
-
-        double radius = getConfig().getDouble("radius", 150);
-        if (player.getLocation().distance(saved) > radius) {
-            exitFreecam(player);
-        }
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Only players can use this command.");
-            return true;
-        }
-
-        Player player = (Player) sender;
-
-        if (label.equalsIgnoreCase("c")) {
-            if (player.getGameMode() == GameMode.SPECTATOR) {
-                return true;
-            }
-            persistence.put(player.getUniqueId(), player.getLocation());
-            player.setGameMode(GameMode.SPECTATOR);
-        } else if (label.equalsIgnoreCase("s")) {
-            exitFreecam(player);
-        }
-
-        return true;
-    }
-
-    private void exitFreecam(Player player) {
-        Location saved = persistence.remove(player.getUniqueId());
-        if (saved != null) {
-            player.teleport(saved);
-        }
-        player.setGameMode(GameMode.SURVIVAL);
     }
 }

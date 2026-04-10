@@ -2,9 +2,19 @@
 <project version="4">
   <component name="RemoteRepositoriesConfiguration">
     <remote-repository>
+      <option name="id" value="citizens-repo" />
+      <option name="name" value="citizens-repo" />
+      <option name="url" value="https://maven.citizensnpcs.co/repo" />
+    </remote-repository>
+    <remote-repository>
       <option name="id" value="central" />
       <option name="name" value="Central Repository" />
       <option name="url" value="https://repo.maven.apache.org/maven2" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="citizens" />
+      <option name="name" value="citizens" />
+      <option name="url" value="https://repo.citizensnpcs.co/repository" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="sonatype" />
@@ -15,6 +25,11 @@
       <option name="id" value="spigotmc-repo" />
       <option name="name" value="spigotmc-repo" />
       <option name="url" value="https://hub.spigotmc.org/nexus/content/repositories/snapshots/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="jitpack" />
+      <option name="name" value="jitpack" />
+      <option name="url" value="https://jitpack.io" />
     </remote-repository>
     <remote-repository>
       <option name="id" value="central" />
