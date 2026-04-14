@@ -1,6 +1,7 @@
 name: servercam
 version: '${project.version}'
 main: com.parknich.servercam.ServerCam
+softdepend: [Citizens, Sentinel]
 commands:
   c:
     description: Enter freecam

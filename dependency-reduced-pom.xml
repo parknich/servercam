@@ -36,7 +36,24 @@
                   <pattern>com.zaxxer.hikari</pattern>
                   <shadedPattern>com.parknich.servercam.lib.hikari</shadedPattern>
                 </relocation>
+                <relocation>
+                  <pattern>org.mariadb.jdbc</pattern>
+                  <shadedPattern>com.parknich.servercam.lib.mariadb</shadedPattern>
+                </relocation>
               </relocations>
+              <transformers>
+                <transformer />
+              </transformers>
+              <filters>
+                <filter>
+                  <artifact>*:*</artifact>
+                  <excludes>
+                    <exclude>META-INF/*.SF</exclude>
+                    <exclude>META-INF/*.DSA</exclude>
+                    <exclude>META-INF/*.RSA</exclude>
+                  </excludes>
+                </filter>
+              </filters>
             </configuration>
           </execution>
         </executions>

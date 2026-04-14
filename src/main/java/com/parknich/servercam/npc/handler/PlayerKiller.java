@@ -1,6 +1,7 @@
 package com.parknich.servercam.npc.handler;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +20,7 @@ public class PlayerKiller implements Listener {
         deathLocations.put(player.getUniqueId(), deathLocation);
         
         for (ItemStack item : player.getInventory().getContents()) {
-            if (item != null && !item.getType().isAir()) {
+            if (item != null && item.getType() != Material.AIR) {
                 deathLocation.getWorld().dropItemNaturally(deathLocation, item);
             }
         }
