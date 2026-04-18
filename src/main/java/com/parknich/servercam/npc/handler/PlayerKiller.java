@@ -1,5 +1,6 @@
 package com.parknich.servercam.npc.handler;
 
+import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -10,6 +11,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class PlayerKiller implements Listener {
@@ -18,14 +20,18 @@ public class PlayerKiller implements Listener {
 
     public void kill(Player player, Location deathLocation) {
         deathLocations.put(player.getUniqueId(), deathLocation);
-        
-        for (ItemStack item : player.getInventory().getContents()) {
-            if (item != null && item.getType() != Material.AIR) {
-                deathLocation.getWorld().dropItemNaturally(deathLocation, item);
+
+        boolean keepInventory = Optional.ofNullable(deathLocation.getWorld().getGameRuleValue(GameRule.KEEP_INVENTORY)).orElse(false);
+
+        if (!keepInventory) {
+            for (ItemStack item : player.getInventory().getContents()) {
+                if (item != null && item.getType() != Material.AIR) {
+                    deathLocation.getWorld().dropItemNaturally(deathLocation, item);
+                }
             }
+            player.getInventory().clear();
         }
         
-        player.getInventory().clear();
         player.setHealth(0);
         player.setGameMode(org.bukkit.GameMode.SURVIVAL);
         player.sendMessage("Your guardian NPC died! You have been slain.");
