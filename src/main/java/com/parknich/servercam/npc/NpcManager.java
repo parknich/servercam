@@ -29,10 +29,10 @@ public class NpcManager {
         
         ConfigurationSection npcConfig = plugin.getConfig().getConfigurationSection("npc");
         boolean configEnabled = npcConfig != null && npcConfig.getBoolean("enabled", false);
-        
-        boolean citizensLoaded = plugin.getServer().getPluginManager().isPluginEnabled(plugin.getServer().getPluginManager().getPlugin("Citizens"));
-        boolean sentinelLoaded = plugin.getServer().getPluginManager().isPluginEnabled(plugin.getServer().getPluginManager().getPlugin("Sentinel"));
-        
+
+        boolean citizensLoaded = plugin.getServer().getPluginManager().isPluginEnabled("Citizens");
+        boolean sentinelLoaded = plugin.getServer().getPluginManager().isPluginEnabled("Sentinel");
+
         this.enabled = configEnabled && citizensLoaded && sentinelLoaded;
         
         this.data = new NpcData();
